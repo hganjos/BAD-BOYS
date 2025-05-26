@@ -1,0 +1,707 @@
+🔧 Implementação do Ansible
+Pré-requisitos
+
+Sistema Linux (preferencialmente Ubuntu/Debian)
+Python 3.8+ instalado
+Acesso SSH aos hosts de destino
+Privilégios sudo
+
+Instalação do Ansible
+No Ubuntu/Debian:
+bash# Atualizar repositórios
+sudo apt update
+
+# Instalar dependências
+sudo apt install python3-pip python3-venv -y
+
+# Criar ambiente virtual
+python3 -m venv ansible-env
+source ansible-env/bin/activate
+
+# Instalar Ansible
+pip install ansible
+
+# Verificar instalação
+ansible --version
+Configuração Inicial
+
+Criar arquivo de inventário (/etc/ansible/hosts):
+
+ini[windows_servers]
+win-server-01 ansible_host=192.168.1.10 ansible_user=Administrator
+
+[debian_servers]
+debian-01 ansible_host=192.168.1.20 ansible_user=admin
+
+[monitoring]
+wazuh-server ansible_host=192.168.1.30 ansible_user=wazuh
+
+[security]
+kali-machine ansible_host=192.168.1.40 ansible_user=kali
+
+[firewall]
+pfsense-fw ansible_host=192.168.1.1 ansible_user=admin
+
+Configurar SSH sem senha:
+
+bash# Gerar chave SSH
+ssh-keygen -t rsa -b 4096
+
+# Copiar chave para hosts
+ssh-copy-id admin@192.168.1.20
+ssh-copy-id wazuh@192.168.1.30
+ssh-copy-id kali@192.168.1.40
+Estrutura de Diretórios Ansible
+ansible/
+├── README.md
+├── ansible.cfg
+├── inventario/
+│   ├── hosts.yml
+│   └── group_vars/
+├── playbooks/
+│   ├── dns-setup.yml
+│   ├── dhcp-setup.yml
+│   ├── wazuh-install.yml
+│   ├── kali-setup.yml
+│   └── pfsense-config.yml
+├── roles/
+│   ├── common/
+│   ├── dns-server/
+│   ├── dhcp-server/
+│   └── monitoring/
+└── scripts/
+    └── deploy-all.sh
+
+🐧 Kali Linux - Ambiente de Testes de Segurança
+Instalação e Configuração
+Download e Instalação
+
+Baixar ISO oficial:
+
+Acesse: https://www.kali.org/get-kali/
+Escolha a versão adequada (64-bit recomendado)
+
+
+Instalação em VM:
+
+RAM mínima: 2GB (recomendado 4GB+)
+Disco: 20GB mínimo (recomendado 40GB+)
+Rede: Bridge ou NAT conforme necessidade
+
+
+
+Configuração Inicial
+bash# Atualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# Instalar ferramentas essenciais
+sudo apt install -y curl wget git vim htop
+
+# Configurar SSH (se necessário)
+sudo systemctl enable ssh
+sudo systemctl start ssh
+
+# Configurar usuário para Ansible
+sudo usermod -aG sudo kali
+Ferramentas de Segurança Essenciais
+bash# Instalar metapackages do Kali
+sudo apt install -y kali-tools-top10
+sudo apt install -y kali-tools-web
+sudo apt install -y kali-tools-information-gathering
+
+# Ferramentas específicas
+sudo apt install -y nmap nikto sqlmap burpsuite
+Playbook Ansible para Kali Linux
+yaml---
+- name: Configure Kali Linux Security Environment
+  hosts: security
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        
+    - name: Install essential security tools
+      apt:
+        name:
+          - nmap
+          - nikto
+          - sqlmap
+          - hydra
+          - john
+          - aircrack-ng
+        state: present
+        
+    - name: Configure SSH service
+      service:
+        name: ssh
+        state: started
+        enabled: yes
+
+🔥 pfSense - Firewall e Roteamento
+Instalação e Configuração
+Download e Instalação
+
+Obter pfSense:
+
+Download: https://www.pfsense.org/download/
+Versão recomendada: Community Edition (CE)
+
+
+Configuração de Hardware Virtual:
+
+RAM: 1GB mínimo (2GB+ recomendado)
+Disco: 8GB mínimo
+Interfaces de rede: Mínimo 2 (WAN e LAN)
+
+
+
+Configuração Inicial
+bash# Configuração via console (durante primeiro boot)
+# 1. Configurar interfaces de rede
+# 2. Definir IP da LAN (ex: 192.168.1.1/24)
+# 3. Configurar senha do admin
+Configuração via Web Interface
+
+Acesso inicial: https://192.168.1.1
+Configurações básicas:
+
+Sistema → Geral → Hostname
+Interfaces → WAN/LAN
+Firewall → Regras
+
+
+
+Configuração de Serviços Essenciais
+xml<!-- Exemplo de configuração DHCP via pfSense -->
+<dhcpd>
+    <lan>
+        <enable/>
+        <range>
+            <from>192.168.1.100</from>
+            <to>192.168.1.200</to>
+        </range>
+        <winsserver/>
+        <dnsserver>192.168.1.1</dnsserver>
+        <gateway>192.168.1.1</gateway>
+    </lan>
+</dhcpd>
+Automação pfSense com Ansible
+yaml---
+- name: Configure pfSense Firewall
+  hosts: firewall
+  gather_facts: no
+  tasks:
+    - name: Configure DHCP settings
+      uri:
+        url: "https://{{ ansible_host }}/api/v1/services/dhcpd"
+        method: POST
+        user: "{{ pfsense_user }}"
+        password: "{{ pfsense_pass }}"
+        body_format: json
+        body:
+          interface: "lan"
+          range_from: "192.168.1.100"
+          range_to: "192.168.1.200"
+        validate_certs: no
+
+💾 Sistema Operacional Extra: CentOS Stream
+Por que CentOS Stream?
+
+Distribuição enterprise
+Compatibilidade com Red Hat
+Excelente para ambientes corporativos
+Boa integração com Ansible
+
+Instalação e Configuração
+Download e Instalação
+
+Obter CentOS Stream:
+
+Download: https://www.centos.org/centos-stream/
+Versão recomendada: Stream 9
+
+
+Configuração mínima:
+
+RAM: 2GB
+Disco: 20GB
+Rede: Configuração estática recomendada
+
+
+
+Configuração Inicial
+bash# Atualizar sistema
+sudo dnf update -y
+
+# Instalar ferramentas essenciais
+sudo dnf install -y wget curl git vim htop
+
+# Configurar SELinux (se necessário)
+sudo setsebool -P httpd_can_network_connect 1
+
+# Configurar firewall
+sudo firewall-cmd --permanent --add-service=ssh
+sudo firewall-cmd --reload
+Playbook para CentOS Stream
+yaml---
+- name: Configure CentOS Stream Server
+  hosts: centos_servers
+  become: yes
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        
+    - name: Install EPEL repository
+      dnf:
+        name: epel-release
+        state: present
+        
+    - name: Install common packages
+      dnf:
+        name:
+          - wget
+          - curl
+          - git
+          - vim
+          - htop
+          - net-tools
+        state: present
+        
+    - name: Configure firewall
+      firewalld:
+        service: ssh
+        permanent: yes
+        state: enabled
+        immediate: yes
+
+🔧 Scripts de Automação Ansible
+Playbook Principal (site.yml)
+yaml---
+- import_playbook: playbooks/common-setup.yml
+- import_playbook: playbooks/dns-setup.yml
+- import_playbook: playbooks/dhcp-setup.yml
+- import_playbook: playbooks/wazuh-install.yml
+- import_playbook: playbooks/kali-setup.yml
+- import_playbook: playbooks/monitoring-setup.yml
+Playbook para DNS (dns-setup.yml)
+yaml---
+- name: Configure DNS Server
+  hosts: debian_servers
+  become: yes
+  vars:
+    dns_domain: "lab.local"
+    dns_forwarders:
+      - "8.8.8.8"
+      - "8.8.4.4"
+  
+  tasks:
+    - name: Install BIND9
+      apt:
+        name: bind9
+        state: present
+        
+    - name: Configure named.conf.local
+      template:
+        src: named.conf.local.j2
+        dest: /etc/bind/named.conf.local
+      notify: restart bind9
+      
+    - name: Create zone files
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - { src: "forward.zone.j2", dest: "/etc/bind/db.{{ dns_domain }}" }
+        - { src: "reverse.zone.j2", dest: "/etc/bind/db.192.168.1" }
+      notify: restart bind9
+      
+  handlers:
+    - name: restart bind9
+      service:
+        name: bind9
+        state: restarted
+Playbook para DHCP (dhcp-setup.yml)
+yaml---
+- name: Configure DHCP Server
+  hosts: debian_servers
+  become: yes
+  vars:
+    dhcp_subnet: "192.168.1.0"
+    dhcp_netmask: "255.255.255.0"
+    dhcp_range_start: "192.168.1.100"
+    dhcp_range_end: "192.168.1.200"
+    dhcp_gateway: "192.168.1.1"
+    dhcp_dns: "192.168.1.10"
+  
+  tasks:
+    - name: Install ISC DHCP Server
+      apt:
+        name: isc-dhcp-server
+        state: present
+        
+    - name: Configure DHCP
+      template:
+        src: dhcpd.conf.j2
+        dest: /etc/dhcp/dhcpd.conf
+      notify: restart dhcp
+      
+    - name: Configure DHCP interface
+      lineinfile:
+        path: /etc/default/isc-dhcp-server
+        regexp: '^INTERFACESv4='
+        line: 'INTERFACESv4="eth0"'
+      notify: restart dhcp
+      
+  handlers:
+    - name: restart dhcp
+      service:
+        name: isc-dhcp-server
+        state: restarted
+Playbook para Wazuh (wazuh-install.yml)
+yaml---
+- name: Install and Configure Wazuh
+  hosts: monitoring
+  become: yes
+  tasks:
+    - name: Add Wazuh repository key
+      apt_key:
+        url: https://packages.wazuh.com/key/GPG-KEY-WAZUH
+        state: present
+        
+    - name: Add Wazuh repository
+      apt_repository:
+        repo: "deb https://packages.wazuh.com/4.x/apt/ stable main"
+        state: present
+        
+    - name: Install Wazuh Manager
+      apt:
+        name: wazuh-manager
+        state: present
+        
+    - name: Start and enable Wazuh Manager
+      service:
+        name: wazuh-manager
+        state: started
+        enabled: yes
+        
+    - name: Install Wazuh API
+      apt:
+        name: wazuh-api
+        state: present
+        
+    - name: Configure Wazuh API
+      service:
+        name: wazuh-api
+        state: started
+        enabled: yes
+Script de Deploy Completo
+bash#!/bin/bash
+# deploy-all.sh
+
+echo "🚀 Iniciando deploy da infraestrutura..."
+
+# Verificar conectividade
+echo "📡 Testando conectividade com hosts..."
+ansible all -m ping
+
+# Deploy dos serviços base
+echo "🔧 Configurando serviços base..."
+ansible-playbook playbooks/common-setup.yml
+
+# Deploy DNS
+echo "🌐 Configurando DNS..."
+ansible-playbook playbooks/dns-setup.yml
+
+# Deploy DHCP
+echo "📋 Configurando DHCP..."
+ansible-playbook playbooks/dhcp-setup.yml
+
+# Deploy Wazuh
+echo "🛡️ Instalando Wazuh..."
+ansible-playbook playbooks/wazuh-install.yml
+
+# Deploy Kali Linux
+echo "🐧 Configurando Kali Linux..."
+ansible-playbook playbooks/kali-setup.yml
+
+echo "✅ Deploy concluído com sucesso!"
+
+📁 Estrutura Completa do Repositório
+infraestrutura-servidores-redes/
+├── README.md
+├── .gitignore
+├── windows-server/
+│   ├── instalacao.md
+│   ├── dns/
+│   │   ├── configuracao.md
+│   │   └── screenshots/
+│   ├── dhcp/
+│   │   ├── configuracao.md
+│   │   └── screenshots/
+│   └── active-directory/
+│       ├── instalacao.md
+│       ├── configuracao.md
+│       └── screenshots/
+├── debian/
+│   ├── instalacao.md
+│   ├── dns/
+│   │   ├── configuracao.md
+│   │   └── scripts/
+│   └── dhcp/
+│       ├── configuracao.md
+│       └── scripts/
+├── wazuh/
+│   ├── instalacao.md
+│   ├── configuracao.md
+│   └── screenshots/
+├── kali/
+│   ├── instalacao.md
+│   ├── configuracao.md
+│   ├── ferramentas.md
+│   └── screenshots/
+├── pfsense/
+│   ├── instalacao.md
+│   ├── configuracao.md
+│   ├── firewall-rules.md
+│   └── screenshots/
+├── centos-stream/
+│   ├── instalacao.md
+│   ├── configuracao.md
+│   └── screenshots/
+└── ansible/
+    ├── README.md
+    ├── ansible.cfg
+    ├── inventario/
+    │   ├── hosts.yml
+    │   └── group_vars/
+    ├── playbooks/
+    │   ├── site.yml
+    │   ├── common-setup.yml
+    │   ├── dns-setup.yml
+    │   ├── dhcp-setup.yml
+    │   ├── wazuh-install.yml
+    │   ├── kali-setup.yml
+    │   └── pfsense-config.yml
+    ├── roles/
+    │   ├── common/
+    │   ├── dns-server/
+    │   ├── dhcp-server/
+    │   └── monitoring/
+    ├── templates/
+    │   ├── dhcpd.conf.j2
+    │   ├── named.conf.local.j2
+    │   └── zone-files/
+    └── scripts/
+        ├── deploy-all.sh
+        └── test-connectivity.sh
+
+🤖 Exemplo de Prompts para IA
+Para Criação de Playbooks Ansible
+Prompt para DNS:
+Crie um playbook Ansible completo para configurar um servidor DNS usando BIND9 no Debian 11. 
+O playbook deve:
+- Instalar o BIND9 e dependências
+- Configurar zonas forward e reverse para o domínio "lab.local"
+- Definir forwarders para 8.8.8.8 e 8.8.4.4
+- Criar registros A para: server01 (192.168.1.10), server02 (192.168.1.20)
+- Incluir handlers para restart do serviço
+- Usar templates Jinja2 para configurações
+- Implementar verificações de sintaxe
+Prompt para DHCP:
+Desenvolva um playbook Ansible para configurar um servidor DHCP usando isc-dhcp-server no Debian. 
+Requisitos:
+- Rede: 192.168.1.0/24
+- Pool: 192.168.1.100 a 192.168.1.200
+- Gateway: 192.168.1.1
+- DNS: 192.168.1.10
+- Lease time: 24 horas
+- Reservas estáticas para servidores críticos
+- Configuração de PXE boot (opcional)
+Prompt para Wazuh:
+Crie um playbook Ansible para instalação completa do Wazuh 4.x incluindo:
+- Wazuh Manager
+- Wazuh API  
+- Elasticsearch
+- Kibana
+- Configuração de agentes
+- Regras personalizadas para monitoramento de SSH
+- Dashboard básico
+- Configuração de alertas via email
+Para Documentação
+Prompt para README principal:
+Gere um README.md profissional e completo para um projeto de infraestrutura de TI no GitHub que inclui:
+- Título chamativo e badges do projeto
+- Descrição detalhada do objetivo
+- Arquitetura da solução (diagrama em ASCII)
+- Tecnologias utilizadas (Windows Server, Debian, Wazuh, Kali, pfSense, Ansible)
+- Pré-requisitos de hardware e software
+- Guia de instalação passo-a-passo
+- Estrutura do repositório explicada
+- Como executar os playbooks Ansible
+- Troubleshooting comum
+- Contribuições e licença
+- Equipe do projeto
+
+🎯 Roteiro de Apresentação PowerPoint
+Slide 1: Introdução
+
+Título: "Implementação de Infraestrutura com Automação Ansible"
+Equipe: Nomes e funções dos membros
+Objetivo: Automatizar deploy de infraestrutura completa
+
+Slide 2: Visão Geral da Arquitetura
+
+Diagrama de rede
+Componentes principais:
+
+Windows Server (DNS, DHCP, AD)
+Debian (DNS, DHCP)
+Wazuh (Monitoramento)
+Kali Linux (Pen Testing)
+pfSense (Firewall)
+CentOS Stream (Aplicações)
+
+
+
+Slide 3: Estrutura do Repositório GitHub
+
+Organização das pastas
+Padrões de documentação
+Controle de versão e commits
+
+Slide 4: Implementação - Windows Server
+
+Screenshots da instalação
+Configuração do Active Directory
+Serviços DNS e DHCP
+Desafios encontrados
+
+Slide 5: Implementação - Debian Linux
+
+Processo de instalação
+Configuração de serviços
+Comparação com Windows Server
+
+Slide 6: Wazuh - Monitoramento de Segurança
+
+Processo de instalação
+Dashboard principal
+Alertas configurados
+Casos de uso
+
+Slide 7: Kali Linux - Testes de Segurança
+
+Ambiente preparado
+Ferramentas instaladas
+Testes realizados
+Vulnerabilidades encontradas
+
+Slide 8: pfSense - Firewall e Roteamento
+
+Configuração de interfaces
+Regras de firewall
+VPN e roteamento
+Monitoramento de tráfego
+
+Slide 9: Automação com Ansible
+
+Playbooks desenvolvidos
+Demo de execução
+Tempo economizado
+Benefícios da automação
+
+Slide 10: Uso de IA no Projeto
+
+Ferramentas utilizadas (ChatGPT, Claude, Copilot)
+Scripts gerados
+Documentação assistida
+Prós e contras
+
+Slide 11: Demonstração Prática
+
+Execução do deploy completo
+Verificação dos serviços
+Testes de conectividade
+Monitoramento em tempo real
+
+Slide 12: Desafios e Soluções
+
+Problemas encontrados:
+
+Compatibilidade entre sistemas
+Configuração de rede
+Dependências do Ansible
+
+
+Soluções implementadas
+Lições aprendidas
+
+Slide 13: Métricas do Projeto
+
+Linhas de código
+Commits realizados
+Tempo de deploy manual vs automatizado
+Uptime dos serviços
+
+Slide 14: Próximos Passos
+
+Melhorias planejadas
+Integração com CI/CD
+Monitoramento avançado
+Backup automatizado
+
+Slide 15: Conclusão
+
+Objetivos alcançados
+Competências desenvolvidas
+Aplicação no mercado de trabalho
+Agradecimentos
+
+
+📚 Recursos e Referências
+Documentação Oficial
+
+Ansible Documentation
+Wazuh Documentation
+pfSense Documentation
+Kali Linux Documentation
+
+Ferramentas de IA Recomendadas
+
+ChatGPT: Geração de scripts e documentação
+GitHub Copilot: Assistência durante desenvolvimento
+Claude: Análise e otimização de código
+
+Templates e Exemplos
+
+Ansible Galaxy
+GitHub Templates
+Best Practices
+
+
+✅ Checklist Final
+Antes da Apresentação
+
+ Todos os serviços funcionando
+ Playbooks testados
+ Documentação completa
+ Screenshots atualizados
+ Demo preparada
+ Repositório organizado
+
+Durante a Apresentação
+
+ Demonstração prática funcionando
+ Backup dos slides
+ Acesso à internet testado
+ Ambiente de demo funcionando
+
+Após a Apresentação
+
+ Código final commitado
+ README atualizado
+ Issues conhecidos documentados
+ Feedback implementado
