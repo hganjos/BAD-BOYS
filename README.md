@@ -102,9 +102,9 @@ Monitore resultados via Wazuh
 
 Equipe do Projeto
 
-[Seu Nome] - Líder do projeto e especialista em Windows Server
-[Nome do Colega 1] - Especialista em Linux e Ansible (se aplicável)
-[Nome do Colega 2] - Especialista em Segurança e Wazuh (se aplicável)
+[Hugo 
+[Pedro
+[Nome do Colega 2]
 
 Instalação Rápida
 Para implementar toda a infraestrutura usando automação:
