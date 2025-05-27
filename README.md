@@ -1,28 +1,54 @@
 # BAD-BOYS
-# 🪟 Active Directory – Instalação e Configuração
+# 🧱 Projeto de Infraestrutura com GitHub
 
-## Pré-requisitos
+## 📌 Descrição
 
-- Windows Server já instalado
-- IP fixo configurado
+Este repositório documenta a instalação e configuração de uma infraestrutura de rede utilizando diversos sistemas operacionais e serviços essenciais. O objetivo é desenvolver habilidades em administração de sistemas, automação, segurança e documentação técnica.
 
-## Instalação
+---
 
-1. Abra o **Gerenciador de Servidores**.
-2. Clique em **Adicionar funções e recursos**.
-3. Avance até chegar em **Funções do Servidor**.
-4. Marque a opção **Serviços de Domínio do Active Directory**.
-5. Instale e aguarde a finalização.
+## 👨‍💻 Membros da Equipe
 
-## Configuração (Promover a Controlador de Domínio)
+- Pedro Morais  
+- Hugo dos Anjos  
+- Guilherme Edimar  
 
-1. Após a instalação, clique na notificação no topo: **"Promover este servidor a controlador de domínio"**.
-2. Selecione **Adicionar uma nova floresta** e defina um nome de domínio (ex: `empresa.local`).
-3. Defina senha do modo de restauração do diretório (DSRM).
-4. Avance com as opções padrão e conclua.
-5. O servidor será reiniciado automaticamente.
+---
 
-## Verificação
+## 🛠️ Tecnologias e Sistemas Utilizados
 
-- Use a ferramenta **"Usuários e Computadores do Active Directory"** para criar usuários e grupos.
-- Verifique se o DNS foi configurado automaticamente.
+- Windows Server
+- Debian Linux
+- Kali Linux
+- Pfsense
+- Wazuh
+- Ansible
+- Git e GitHub
+
+---
+
+🔧 Requisitos Gerais
+Virtualizador instalado (VirtualBox ou VMware)
+
+- ISOs dos sistemas operacionais:
+- Windows Server
+- Debian
+- Kali Linux
+- Pfsense
+- Conta no GitHub
+- Git instalado
+- Acesso à internet
+- 8 GB de RAM (mínimo recomendado)
+- 100 GB de espaço em disco
+
+
+---
+
+## 🤖 Uso de Inteligência Artificial (IA)
+
+Durante o desenvolvimento do projeto, utilizamos ferramentas de Inteligência Artificial como **ChatGPT** para:
+
+- Gerar playbooks do Ansible com boas práticas de automação;
+- Escrever descrições técnicas e instruções de instalação em Markdown;
+- Criar prompts para configurar serviços como DNS, DHCP e Active Directory;
+- Corrigir comandos e sugestões de estrutura de repositório.
