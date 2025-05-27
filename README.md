@@ -1,180 +1,28 @@
 # BAD-BOYS
-Este repositório contém a documentação completa para instalação e configuração de uma infraestrutura de rede robusta e segura, incluindo sistemas operacionais, serviços de rede e ferramentas de monitoramento de segurança. O projeto foi desenvolvido como parte de um exercício acadêmico focado em boas práticas de administração de sistemas e automação.
-Objetivos
+# 🪟 Active Directory – Instalação e Configuração
 
-Documentar processos de instalação e configuração de sistemas críticos
-Implementar serviços essenciais de rede (DNS, DHCP, Active Directory)
-Estabelecer monitoramento de segurança com Wazuh
-Automatizar tarefas com Ansible
-Criar ambiente de testes de segurança com Kali Linux
-Implementar firewall corporativo com pfSense
+## Pré-requisitos
 
-Tecnologias Utilizadas
-Sistemas Operacionais
+- Windows Server já instalado
+- IP fixo configurado
 
-Windows Server 2022 - Servidor principal para Active Directory
-Debian 12 - Servidor Linux para serviços de rede
-Kali Linux 2024 - Distribuição para testes de segurança
-pfSense 2.7 - Firewall e roteadores corporativos
-Ubuntu Server 22.04 LTS - Sistema adicional para diversificação
+## Instalação
 
-Serviços e Ferramentas
+1. Abra o **Gerenciador de Servidores**.
+2. Clique em **Adicionar funções e recursos**.
+3. Avance até chegar em **Funções do Servidor**.
+4. Marque a opção **Serviços de Domínio do Active Directory**.
+5. Instale e aguarde a finalização.
 
-DNS - Resolução de nomes
-DHCP - Distribuição automática de IPs
-Active Directory - Gerenciamento de usuários e políticas
-Wazuh - SIEM e monitoramento de segurança
-Ansible - Automação e orquestração
-Docker - Containerização de serviços
+## Configuração (Promover a Controlador de Domínio)
 
-Pré-requisitos
-Hardware Mínimo
+1. Após a instalação, clique na notificação no topo: **"Promover este servidor a controlador de domínio"**.
+2. Selecione **Adicionar uma nova floresta** e defina um nome de domínio (ex: `empresa.local`).
+3. Defina senha do modo de restauração do diretório (DSRM).
+4. Avance com as opções padrão e conclua.
+5. O servidor será reiniciado automaticamente.
 
-RAM: 32GB (recomendado para executar múltiplas VMs)
-Armazenamento: 500GB SSD
-Processador: Intel i5 ou AMD Ryzen 5 (com suporte à virtualização)
-Rede: Adaptador Ethernet Gigabit
+## Verificação
 
-Software Necessário
-
-VMware Workstation Pro ou VirtualBox
-Git para controle de versão
-Editor de texto (VS Code recomendado)
-Cliente SSH (PuTTY ou terminal nativo)
-
-Estrutura do Repositório
-infraestrutura-seguranca/
-├── README.md # Este arquivo
-├── docs/ # Documentação geral
-│ ├── arquitetura.md # Diagrama da arquitetura
-│ ├── requisitos.md # Requisitos detalhados
-│ └── Troubleshooting.md # Solução de problemas
-├── windows-server/ # Windows Server 2022
-│ ├── instalacao.md # Instalação do SO
-│ ├── dns/ # Configuração DNS
-│ ├── dhcp/ # Configuração DHCP
-│ └── active-directory/ # Configuração AD
-├── debian/# Debian 12
-│ ├── instalacao.md # Instalação do SO
-│ ├── dns/ # DNS com BIND9
-│ ├── dhcp/ # DHCP com ISC-DHCP
-│ └── hardening/ # Configurações de segurança
-├── ubuntu-server/ # Ubuntu Server 22.04
-│ ├── instalacao.md # Instalação do SO
-│ ├── docker/ # Configuração Docker
-│ └── monitoração/ # Ferramentas de monitoramento
-├── wazuh/ # Sistema de Monitoramento
-│ ├── instalacao.md # Instalação do Wazuh
-│ ├── configuração/ # Configurações específicas
-│ └── regras/ # Regras customizadas
-├── kali/ # Kali Linux
-│ ├── instalação e configuração
-│ ├── ferramentas/ # Ferramentas de pentesting
-│ └── scripts/ # Scripts personalizados
-├── pfsense/ # pfSense Firewall
-│ ├── instalacao.md # Instalação do pfSense
-│ ├── configuracao/ # Configurações de firewall
-│ └── vpn/ # Configuração de VPN
-└── ansible/ # Automação
-├── README.md # Documentação dos manuais
-├── playbooks/ # Playbooks para automação
-├── inventário/ # Inventários de hosts
-├── roles/ # Roles customizadas
-└── group_vars/ # Variáveis ​​por grupo
-🚀 Guia de Navegação
-Para Administradores Iniciantes
-
-Comece com docs/arquitetura.md para entender a estrutura
-Siga docs/requisitos.md para preparar o ambiente
-Inicie pela instalação do Windows Server
-
-Para Administradores Experimentais
-
-Consulte ansible/README.md para automação
-Acesse wazuh/ para implementação de monitoramento
-Configure pfsense/ para segurança de perímetro
-
-Para Testes de Segurança
-
-Configure kali/instalacao.md
-Execute testes seguindo kali/ferramentas/
-Monitore resultados via Wazuh
-
-Equipe do Projeto
-
-[Hugo 
-[Pedro
-[Nome do Colega 2]
-
-Instalação Rápida
-Para implementar toda a infraestrutura usando automação:
-bash# Clone o repositório
-git clone https://github.com/[seu-usuario]/infraestrutura-seguranca.git
-cd infraestrutura-seguranca
-
-Configurar o inventário Ansible
-cp ansible/inventory/hosts.example ansible/inventory/hosts
-
-Edite o arquivo hosts com seus IPs
-Execute a instalação automaticamente
-cd ansible
-ansible-playbook -i inventário/hosts playbooks/site.yml
-
-Monitoramento e Alertas
-Após a implementação, acesse:
-
-Painel Wazuh: https://[wazuh-ip]:443
-GUI da Web pfSense: https://[pfsense-ip]:443
-Centro de administração do Windows: https://[windows-server-ip]:6516
-
-Considerações de Segurança
-Este projeto está sendo implementado:
-
-✅ Autenticação multifator onde possível
-✅ Criptografia de dados em trânsito
-✅ Monitoramento contínuo de logs
-✅ Segregação de rede por VLANs
-✅ Políticas de senha rigorosas
-✅ Backup automatizado
-
-Próximos Passos
-
-Implementar backup automatizado com Veeam
-Configurar replicação entre sites
-Adicionar monitoramento com Grafana
-Implementar CI/CD com GitLab
-Configurar recuperação de desastres
-
-Solução de Problemas
-Para problemas comuns, consulte docs/troubleshooting.md .
-Para suporte específico:
-
-Verifique os logs no Wazuh
-Consulte a documentação oficial de cada serviço
-Utilize os fóruns da comunidade
-
-Recursos Adicionais
-Documentação Oficial
-
-
-Documentação do Debian do Windows Server 2022
-Documentação do Wazuh
-Documentação do Ansible
-Documentação do pfSense
-
-Treinamentos recomendados
-
-Certificado pela Microsoft: Administrador Híbrido do Windows Server
-Administrador de Sistema Certificado pela Red Hat (RHCSA) Hacker Ético Certificado pela
-CompTIA Security+ (CEH)
-
-Licença
-Este projeto está licenciado sob a MIT License - veja o arquivo LICENSE para detalhes.
-Contribuições
-Contribuições são bem-vindas! Por favor:
-
-Faça um fork do projeto
-Crie um branch para seu feature (git checkout -b feature/AmazingFeature)
-Comprometa suas mudanças (git commit -m 'Add some AmazingFeature')
-Push para um branch (git push origin feature/AmazingFeature)
-Abra um Pull Request
+- Use a ferramenta **"Usuários e Computadores do Active Directory"** para criar usuários e grupos.
+- Verifique se o DNS foi configurado automaticamente.
